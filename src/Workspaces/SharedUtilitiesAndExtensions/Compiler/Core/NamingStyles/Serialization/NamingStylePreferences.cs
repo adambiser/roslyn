@@ -154,6 +154,20 @@ namespace Microsoft.CodeAnalysis.Diagnostics.Analyzers.NamingStyles
       </ApplicableAccessibilityList>
       <RequiredModifierList />
     </SymbolSpecification>
+    <SymbolSpecification ID=""4d1e95c3-424b-469c-a98c-d97f98344880"" Name=""{CompilerExtensionsResources.Module}"">
+      <ApplicableSymbolKindList>
+        <TypeKind>Module</TypeKind>
+      </ApplicableSymbolKindList>
+      <ApplicableAccessibilityList>
+        <AccessibilityKind>Public</AccessibilityKind>
+        <AccessibilityKind>Internal</AccessibilityKind>
+        <AccessibilityKind>Private</AccessibilityKind>
+        <AccessibilityKind>Protected</AccessibilityKind>
+        <AccessibilityKind>ProtectedOrInternal</AccessibilityKind>
+        <AccessibilityKind>ProtectedAndInternal</AccessibilityKind>
+      </ApplicableAccessibilityList>
+      <RequiredModifierList />
+    </SymbolSpecification>
     <SymbolSpecification ID=""23d856b4-5089-4405-83ce-749aada99153"" Name=""{CompilerExtensionsResources.Interface}"">
       <ApplicableSymbolKindList>
         <TypeKind>Interface</TypeKind>
@@ -341,6 +355,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics.Analyzers.NamingStyles
     <SymbolSpecification ID=""2c07f5bf-bc81-4c2b-82b4-ae9b3ffd0ba4"" Name=""{CompilerExtensionsResources.Types}"">
       <ApplicableSymbolKindList>
         <TypeKind>Class</TypeKind>
+        <TypeKind>Module</TypeKind>
         <TypeKind>Struct</TypeKind>
         <TypeKind>Interface</TypeKind>
         <TypeKind>Enum</TypeKind>
