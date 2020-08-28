@@ -92,6 +92,11 @@
         <target state="translated">修飾元喜好設定</target>
         <note />
       </trans-unit>
+      <trans-unit id="Module">
+        <source>Module</source>
+        <target state="new">Module</target>
+        <note>{locked} unless the capitalization should be handled differently</note>
+      </trans-unit>
       <trans-unit id="Naming_rules">
         <source>Naming rules</source>
         <target state="translated">命名規則</target>

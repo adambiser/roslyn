@@ -92,6 +92,11 @@
         <target state="translated">Einstellungen für Modifizierer</target>
         <note />
       </trans-unit>
+      <trans-unit id="Module">
+        <source>Module</source>
+        <target state="new">Module</target>
+        <note>{locked} unless the capitalization should be handled differently</note>
+      </trans-unit>
       <trans-unit id="Naming_rules">
         <source>Naming rules</source>
         <target state="translated">Benennungsregeln</target>

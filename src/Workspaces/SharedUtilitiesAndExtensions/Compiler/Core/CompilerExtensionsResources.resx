@@ -165,6 +165,10 @@
     <value>Class</value>
     <comment>{locked} unless the capitalization should be handled differently</comment>
   </data>
+  <data name="Module" xml:space="preserve">
+    <value>Module</value>
+    <comment>{locked} unless the capitalization should be handled differently</comment>
+  </data>
   <data name="Delegate" xml:space="preserve">
     <value>Delegate</value>
     <comment>{locked} unless the capitalization should be handled differently</comment>
