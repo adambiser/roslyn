@@ -1497,6 +1497,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 diagnostics.Add(ErrorCode.ERR_CloneDisallowedInRecord, member.Locations[0]);
             }
+
+            var isGetHashCodeNotDeclared = GetMembers("GetHashCode").IsEmpty;
+            var isEqualsNotDeclared = GetMembers("GetHashCode").IsEmpty;
+            if (isGetHashCodeNotDeclared ^ isEqualsNotDeclared)
+            {
+                // TODO: Report diagnostic.
+            }
         }
 
         private void CheckMemberNameConflicts(DiagnosticBag diagnostics)
