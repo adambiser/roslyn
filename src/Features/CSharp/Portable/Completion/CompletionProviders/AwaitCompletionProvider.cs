@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Completion;
@@ -50,7 +51,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Completion.Providers
         private static SyntaxNode AddAsyncModifier(SyntaxNode declaration, SyntaxGenerator generator)
         {
             var modifiers = generator.GetModifiers(declaration);
-            return generator.WithModifiers(declaration, modifiers.WithAsync(true));
+            var newDeclaration = generator.WithModifiers(declaration, modifiers.WithAsync(true));
+            var asyncModifier = newDeclaration.GetModifiers().Single(m => m.IsKind(SyntaxKind.AsyncKeyword));
+            var newModifiers = newDeclaration.GetModifiers().Replace(asyncModifier, asyncModifier.WithAppendedTrailingTrivia(SyntaxFactory.ElasticSpace));
+            return newDeclaration.WithModifiers(newModifiers) ?? declaration;
         }
 
         public override async Task ProvideCompletionsAsync(CompletionContext context)
