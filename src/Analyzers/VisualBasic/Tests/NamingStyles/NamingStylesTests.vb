@@ -497,5 +497,14 @@ End Class",
                 options:=s_options.TypeParameterNamesStartWithT)
         End Function
 
+        <Fact, Trait(Traits.Feature, Traits.Features.NamingStyle)>
+        Public Async Function TestModules() As Task
+            Await TestInRegularAndScriptAsync(
+"Public Module [|m|]
+End Module",
+"Public Module M
+End Module",
+                options:=s_options.ClassNamesArePascalCase)
+        End Function
     End Class
 End Namespace
