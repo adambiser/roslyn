@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -1247,8 +1245,13 @@ namespace Microsoft.CodeAnalysis.Diagnostics
                 var hasUnsuppressedDiagnostic = false;
                 foreach (var descriptor in descriptors)
                 {
-                    if (!options.TryGetDiagnosticValue(tree, descriptor.Id, AnalyzerExecutor.CancellationToken, out var configuredSeverity) ||
-                        configuredSeverity != ReportDiagnostic.Suppress)
+                    _ = options.TryGetGlobalDiagnosticValue(descriptor.Id, AnalyzerExecutor.CancellationToken, out var configuredSeverity);
+                    if (options.TryGetDiagnosticValue(tree, descriptor.Id, AnalyzerExecutor.CancellationToken, out var diagnosticSeverity))
+                    {
+                        configuredSeverity = diagnosticSeverity;
+                    }
+
+                    if (configuredSeverity != ReportDiagnostic.Suppress)
                     {
                         // Analyzer reports a diagnostic that is not suppressed by the diagnostic options for this tree.
                         hasUnsuppressedDiagnostic = true;
@@ -1404,7 +1407,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics
                     await ProcessEventAsync(completedEvent, analysisScope, analysisState, cancellationToken).ConfigureAwait(false);
                 }
             }
-            catch (Exception e) when (FatalError.ReportUnlessCanceled(e))
+            catch (Exception e) when (FatalError.ReportAndPropagateUnlessCanceled(e))
             {
                 throw ExceptionUtilities.Unreachable;
             }
@@ -1463,7 +1466,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics
 
                 return completedEvent;
             }
-            catch (Exception e) when (FatalError.ReportUnlessCanceled(e))
+            catch (Exception e) when (FatalError.ReportAndPropagateUnlessCanceled(e))
             {
                 throw ExceptionUtilities.Unreachable;
             }
@@ -2683,7 +2686,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics
                 {
                     return GetOperationsToAnalyze(operationBlocksToAnalyze);
                 }
-                catch (Exception ex) when (ex is InsufficientExecutionStackException || FatalError.ReportWithoutCrashUnlessCanceled(ex))
+                catch (Exception ex) when (ex is InsufficientExecutionStackException || FatalError.ReportAndCatchUnlessCanceled(ex))
                 {
                     // the exception filter will short-circuit if `ex` is `InsufficientExecutionStackException` (from OperationWalker)
                     // and no non-fatal-watson will be logged as a result.

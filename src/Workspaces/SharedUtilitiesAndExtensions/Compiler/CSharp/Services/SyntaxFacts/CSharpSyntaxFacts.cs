@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,7 +33,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
 {
     internal class CSharpSyntaxFacts : AbstractSyntaxFacts, ISyntaxFacts
     {
-        internal static readonly CSharpSyntaxFacts Instance = new CSharpSyntaxFacts();
+        internal static readonly CSharpSyntaxFacts Instance = new();
 
         protected CSharpSyntaxFacts()
         {
@@ -169,7 +171,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
         public SyntaxNode? GetRootConditionalAccessExpression(SyntaxNode? node)
             => node.GetRootConditionalAccessExpression();
 
-#nullable restore
+#nullable disable
 
         public bool IsObjectCreationExpressionType(SyntaxNode node)
             => node.IsParentKind(SyntaxKind.ObjectCreationExpression, out ObjectCreationExpressionSyntax objectCreation) &&
@@ -296,7 +298,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
             => node.Kind() == SyntaxKind.ThrowExpression;
 
         public bool IsPredefinedType(SyntaxToken token)
-            => TryGetPredefinedType(token, out var actualType) && actualType != PredefinedType.None;
+            => TryGetPredefinedType(token, out _);
 
         public bool IsPredefinedType(SyntaxToken token, PredefinedType type)
             => TryGetPredefinedType(token, out var actualType) && actualType == type;
@@ -548,7 +550,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
 #nullable enable
         public bool IsMemberBindingExpression([NotNullWhen(true)] SyntaxNode? node)
             => node is MemberBindingExpressionSyntax;
-#nullable restore
+#nullable disable
 
         public bool IsPointerMemberAccessExpression(SyntaxNode node)
             => (node as MemberAccessExpressionSyntax)?.Kind() == SyntaxKind.PointerMemberAccessExpression;
@@ -571,6 +573,9 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
 
         public SyntaxNode GetTargetOfMemberBinding(SyntaxNode node)
             => (node as MemberBindingExpressionSyntax).GetParentConditionalAccessExpression()?.Expression;
+
+        public SyntaxNode GetNameOfMemberBindingExpression(SyntaxNode node)
+            => ((MemberBindingExpressionSyntax)node).Name;
 
         public SyntaxNode GetExpressionOfMemberAccessExpression(SyntaxNode node, bool allowImplicitTarget)
             => (node as MemberAccessExpressionSyntax)?.Expression;
@@ -1022,7 +1027,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
             {
                 var parent = node.Parent;
 
-                // If this node is on the left side of a member access expression, don't ascend 
+                // If this node is on the left side of a member access expression, don't ascend
                 // further or we'll end up binding to something else.
                 if (parent is MemberAccessExpressionSyntax memberAccess)
                 {
@@ -1032,7 +1037,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
                     }
                 }
 
-                // If this node is on the left side of a qualified name, don't ascend 
+                // If this node is on the left side of a qualified name, don't ascend
                 // further or we'll end up binding to something else.
                 if (parent is QualifiedNameSyntax qualifiedName)
                 {
@@ -1042,7 +1047,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
                     }
                 }
 
-                // If this node is on the left side of a alias-qualified name, don't ascend 
+                // If this node is on the left side of a alias-qualified name, don't ascend
                 // further or we'll end up binding to something else.
                 if (parent is AliasQualifiedNameSyntax aliasQualifiedName)
                 {
@@ -1244,7 +1249,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
             => GetArgumentsOfArgumentList((invocationExpression as InvocationExpressionSyntax)?.ArgumentList);
 
         public SeparatedSyntaxList<SyntaxNode> GetArgumentsOfObjectCreationExpression(SyntaxNode objectCreationExpression)
-            => GetArgumentsOfArgumentList((objectCreationExpression as ObjectCreationExpressionSyntax)?.ArgumentList);
+            => GetArgumentsOfArgumentList((objectCreationExpression as BaseObjectCreationExpressionSyntax)?.ArgumentList);
 
         public SeparatedSyntaxList<SyntaxNode> GetArgumentsOfArgumentList(SyntaxNode argumentList)
             => (argumentList as BaseArgumentListSyntax)?.Arguments ?? default;
@@ -1301,7 +1306,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
             //    type-declaration
             switch (node.Kind())
             {
-                // Because fields declarations can define multiple symbols "public int a, b;" 
+                // Because fields declarations can define multiple symbols "public int a, b;"
                 // We want to get the VariableDeclarator node inside the field declaration to print out the symbol for the name.
                 case SyntaxKind.VariableDeclarator:
                     return node.Parent.Parent.IsKind(SyntaxKind.FieldDeclaration) ||
@@ -1693,7 +1698,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
 #nullable enable
         public bool IsStatementContainer([NotNullWhen(true)] SyntaxNode? node)
             => IsExecutableBlock(node) || node.IsEmbeddedStatementOwner();
-#nullable restore
+#nullable disable
 
         public IReadOnlyList<SyntaxNode> GetStatementContainerStatements(SyntaxNode node)
             => IsExecutableBlock(node)
@@ -1753,6 +1758,7 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
                 case SyntaxKind.EventFieldDeclaration:
                 case SyntaxKind.GetAccessorDeclaration:
                 case SyntaxKind.SetAccessorDeclaration:
+                case SyntaxKind.InitAccessorDeclaration:
                 case SyntaxKind.AddAccessorDeclaration:
                 case SyntaxKind.RemoveAccessorDeclaration:
                     return true;
@@ -1875,6 +1881,8 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
             {
                 case SyntaxKind.ClassDeclaration:
                     return DeclarationKind.Class;
+                case SyntaxKind.RecordDeclaration:
+                    return DeclarationKind.Record;
                 case SyntaxKind.StructDeclaration:
                     return DeclarationKind.Struct;
                 case SyntaxKind.InterfaceDeclaration:
@@ -2123,5 +2131,14 @@ namespace Microsoft.CodeAnalysis.CSharp.LanguageServices
 
         public bool IsImplicitObjectCreation(SyntaxNode node)
             => node.IsKind(SyntaxKind.ImplicitObjectCreationExpression);
+
+        public SyntaxNode GetExpressionOfThrowExpression(SyntaxNode throwExpression)
+            => ((ThrowExpressionSyntax)throwExpression).Expression;
+
+        public bool IsThrowStatement(SyntaxNode node)
+            => node.IsKind(SyntaxKind.ThrowStatement);
+
+        public bool IsLocalFunction(SyntaxNode node)
+            => node.IsKind(SyntaxKind.LocalFunctionStatement);
     }
 }

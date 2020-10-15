@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,7 +11,7 @@ using Microsoft.CodeAnalysis.Host;
 
 namespace Microsoft.CodeAnalysis.LanguageServices
 {
-    internal interface ISemanticFactsService : ISemanticFacts, ILanguageService
+    internal partial interface ISemanticFactsService : ISemanticFacts, ILanguageService
     {
         bool IsExpressionContext(SemanticModel semanticModel, int position, CancellationToken cancellationToken);
         bool IsStatementContext(SemanticModel semanticModel, int position, CancellationToken cancellationToken);
@@ -38,6 +40,10 @@ namespace Microsoft.CodeAnalysis.LanguageServices
         SyntaxToken GenerateUniqueLocalName(
             SemanticModel semanticModel, SyntaxNode location,
             SyntaxNode containerOpt, string baseName, CancellationToken cancellationToken);
+
+        SyntaxToken GenerateUniqueLocalName(
+            SemanticModel semanticModel, SyntaxNode location,
+            SyntaxNode containerOpt, string baseName, IEnumerable<string> usedNames, CancellationToken cancellationToken);
 
         SyntaxToken GenerateUniqueName(string baseName, IEnumerable<string> usedNames);
     }

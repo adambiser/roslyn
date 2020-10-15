@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
-
-#nullable enable
 namespace Microsoft.CodeAnalysis
 {
     /// <summary>
@@ -15,7 +13,7 @@ namespace Microsoft.CodeAnalysis
     internal readonly struct GeneratorState
     {
         /// <summary>
-        /// Gets an uninitalized generator state
+        /// Gets an uninitialized generator state
         /// </summary>
         internal static GeneratorState Uninitialized;
 

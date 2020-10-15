@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -93,7 +91,7 @@ namespace Microsoft.CodeAnalysis.Remote
 
                     return solution;
                 }
-                catch (Exception e) when (FatalError.ReportWithoutCrashUnlessCanceledAndPropagate(e))
+                catch (Exception e) when (FatalError.ReportAndPropagateUnlessCanceled(e))
                 {
                     throw ExceptionUtilities.Unreachable;
                 }
@@ -405,7 +403,8 @@ namespace Microsoft.CodeAnalysis.Remote
                 // changed text
                 if (oldDocumentChecksums.Text != newDocumentChecksums.Text)
                 {
-                    var sourceText = await _assetProvider.GetAssetAsync<SourceText>(newDocumentChecksums.Text, _cancellationToken).ConfigureAwait(false);
+                    var serializableSourceText = await _assetProvider.GetAssetAsync<SerializableSourceText>(newDocumentChecksums.Text, _cancellationToken).ConfigureAwait(false);
+                    var sourceText = await serializableSourceText.GetTextAsync(_cancellationToken).ConfigureAwait(false);
 
                     document = document.Kind switch
                     {
@@ -428,6 +427,7 @@ namespace Microsoft.CodeAnalysis.Remote
                 Contract.ThrowIfFalse(document.State.Attributes.Name == newDocumentInfo.Name);
                 Contract.ThrowIfFalse(document.State.Attributes.FilePath == newDocumentInfo.FilePath);
                 Contract.ThrowIfFalse(document.State.Attributes.IsGenerated == newDocumentInfo.IsGenerated);
+                Contract.ThrowIfFalse(document.State.Attributes.DesignTimeOnly == newDocumentInfo.DesignTimeOnly);
 
                 if (document.State.Attributes.Folders != newDocumentInfo.Folders)
                 {

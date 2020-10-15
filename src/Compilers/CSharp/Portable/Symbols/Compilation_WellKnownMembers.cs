@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -432,6 +430,24 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             return new SynthesizedAttributeData(ctorSymbol, arguments, namedStringArguments);
+        }
+
+        internal SynthesizedAttributeData? TrySynthesizeAttribute(
+            SpecialMember constructor,
+            bool isOptionalUse = false)
+        {
+            var ctorSymbol = (MethodSymbol)this.GetSpecialTypeMember(constructor);
+
+            if ((object)ctorSymbol == null)
+            {
+                Debug.Assert(isOptionalUse);
+                return null;
+            }
+
+            return new SynthesizedAttributeData(
+                ctorSymbol,
+                arguments: ImmutableArray<TypedConstant>.Empty,
+                namedArguments: ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty);
         }
 
         internal SynthesizedAttributeData? SynthesizeDecimalConstantAttribute(decimal value)

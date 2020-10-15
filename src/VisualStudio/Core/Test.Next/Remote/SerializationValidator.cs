@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -190,8 +188,8 @@ namespace Microsoft.CodeAnalysis.Remote.UnitTests
                 documentObject.Info, WellKnownSynchronizationKind.DocumentAttributes,
                 (v, k, s) => new SolutionAsset(s.CreateChecksum(v, CancellationToken.None), v)).ConfigureAwait(false);
 
-            await VerifyAssetSerializationAsync<SourceText>(
-                documentObject.Text, WellKnownSynchronizationKind.SourceText,
+            await VerifyAssetSerializationAsync<SerializableSourceText>(
+                documentObject.Text, WellKnownSynchronizationKind.SerializableSourceText,
                 (v, k, s) => new SolutionAsset(s.CreateChecksum(v, CancellationToken.None), v));
         }
 
@@ -330,7 +328,7 @@ namespace Microsoft.CodeAnalysis.Remote.UnitTests
         {
             await VerifyChecksumInServiceAsync(documentObject.Checksum, documentObject.GetWellKnownSynchronizationKind()).ConfigureAwait(false);
             await VerifyChecksumInServiceAsync(documentObject.Info, WellKnownSynchronizationKind.DocumentAttributes).ConfigureAwait(false);
-            await VerifyChecksumInServiceAsync(documentObject.Text, WellKnownSynchronizationKind.SourceText).ConfigureAwait(false);
+            await VerifyChecksumInServiceAsync(documentObject.Text, WellKnownSynchronizationKind.SerializableSourceText).ConfigureAwait(false);
         }
 
         internal async Task VerifySynchronizationObjectInServiceAsync(SolutionAsset syncObject)

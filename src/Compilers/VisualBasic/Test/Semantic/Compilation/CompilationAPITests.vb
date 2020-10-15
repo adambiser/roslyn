@@ -116,13 +116,8 @@ End Class")
             options = options.WithSyntaxTreeOptionsProvider(
                 new TestSyntaxTreeOptionsProvider(tree, ("BC42024", ReportDiagnostic.Error)))
             Dim comp2 = CreateCompilationWithMscorlib45({tree}, options:=options)
-            ' Tree options should have precedence over specific diagnostic options
-            comp2.AssertTheseDiagnostics(
-                <errors>
-BC42024: Unused local variable: 'x'.
-        Dim x As Integer
-            ~
-                </errors>)
+            ' Specific diagnostic options should have precedence over tree options
+            comp2.AssertNoDiagnostics()
         End Sub
 
         <Fact>
@@ -141,7 +136,7 @@ Class D
 End Class")
 
             Dim options = TestOptions.DebugDll.WithSyntaxTreeOptionsProvider(
-                new TestSyntaxTreeOptionsProvider(
+                New TestSyntaxTreeOptionsProvider(
                     (tree, {("BC42024", ReportDiagnostic.Suppress)}),
                     (newTree, {("BC4024", ReportDiagnostic.Error)})))
             Dim comp = CreateCompilationWithMscorlib45({tree, newTree}, options:=options)
@@ -168,8 +163,9 @@ End Class")
             comp.AssertNoDiagnostics()
 
             options = options.WithSyntaxTreeOptionsProvider(
-                new TestSyntaxTreeOptionsProvider(
+                New TestSyntaxTreeOptionsProvider(
                     StringComparer.Ordinal,
+                    Nothing,
                     (tree, {("bc42024", ReportDiagnostic.Suppress)}))
             )
 

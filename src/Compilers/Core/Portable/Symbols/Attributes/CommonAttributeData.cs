@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -22,7 +21,6 @@ namespace Microsoft.CodeAnalysis
         {
         }
 
-        // Use MemberNotNull when available https://github.com/dotnet/roslyn/issues/41964
         /// <summary>
         /// The attribute class.
         /// </summary>
@@ -42,13 +40,13 @@ namespace Microsoft.CodeAnalysis
         /// Constructor arguments on the attribute.
         /// </summary>
         public ImmutableArray<TypedConstant> ConstructorArguments { get { return CommonConstructorArguments; } }
-        internal protected abstract ImmutableArray<TypedConstant> CommonConstructorArguments { get; }
+        protected internal abstract ImmutableArray<TypedConstant> CommonConstructorArguments { get; }
 
         /// <summary>
         /// Named (property value) arguments on the attribute. 
         /// </summary>
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments { get { return CommonNamedArguments; } }
-        internal protected abstract ImmutableArray<KeyValuePair<string, TypedConstant>> CommonNamedArguments { get; }
+        protected internal abstract ImmutableArray<KeyValuePair<string, TypedConstant>> CommonNamedArguments { get; }
 
         /// <summary>
         /// Attribute is conditionally omitted if it is a source attribute and both the following are true:
@@ -60,6 +58,7 @@ namespace Microsoft.CodeAnalysis
             get { return false; }
         }
 
+        [MemberNotNullWhen(true, nameof(AttributeClass), nameof(AttributeConstructor))]
         internal virtual bool HasErrors
         {
             get { return false; }
@@ -158,12 +157,12 @@ namespace Microsoft.CodeAnalysis
         /// For user defined attributes VB allows duplicate named arguments and uses the last value.
         /// Dev11 reports an error for pseudo-custom attributes when emitting metadata. We don't.
         /// </remarks>
-        internal T? DecodeNamedArgument<T>(string name, SpecialType specialType, T defaultValue = default)
+        internal T? DecodeNamedArgument<T>(string name, SpecialType specialType, T? defaultValue = default)
         {
             return DecodeNamedArgument<T>(CommonNamedArguments, name, specialType, defaultValue);
         }
 
-        private static T? DecodeNamedArgument<T>(ImmutableArray<KeyValuePair<string, TypedConstant>> namedArguments, string name, SpecialType specialType, T defaultValue = default)
+        private static T? DecodeNamedArgument<T>(ImmutableArray<KeyValuePair<string, TypedConstant>> namedArguments, string name, SpecialType specialType, T? defaultValue = default)
         {
             int index = IndexOfNamedArgument(namedArguments, name);
             return index >= 0 ? namedArguments[index].Value.DecodeValue<T>(specialType) : defaultValue;

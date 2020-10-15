@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -305,8 +303,8 @@ using Microsoft.CodeAnalysis;
 [Generator]
 public class Generator : ISourceGenerator
 {{
-            public void Execute(SourceGeneratorContext context) {{ }}
-            public void Initialize(InitializationContext context) {{ }}
+            public void Execute(GeneratorExecutionContext context) {{ }}
+            public void Initialize(GeneratorInitializationContext context) {{ }}
  }}";
 
                 var directory = Temp.CreateDirectory();
@@ -358,8 +356,8 @@ public class Generator : ISourceGenerator
         [Generator]
         public class TestGenerator : ISourceGenerator
         {
-            public void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
-            public void Initialize(InitializationContext context) => throw new NotImplementedException();
+            public void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
+            public void Initialize(GeneratorInitializationContext context) => throw new NotImplementedException();
         }
 
         public class SomeType
@@ -374,8 +372,8 @@ public class Generator : ISourceGenerator
             [Generator]
             public class NestedGenerator : ISourceGenerator
             {
-                public void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
-                public void Initialize(InitializationContext context) => throw new NotImplementedException();
+                public void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
+                public void Initialize(GeneratorInitializationContext context) => throw new NotImplementedException();
             }
         }
     }
@@ -424,27 +422,27 @@ public class Generator : ISourceGenerator
     [Generator]
     public class TestGenerator : ISourceGenerator
     {
-        public void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
-        public void Initialize(InitializationContext context) => throw new NotImplementedException();
+        public void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
+        public void Initialize(GeneratorInitializationContext context) => throw new NotImplementedException();
     }
 
     public class TestGeneratorNoAttrib : ISourceGenerator
     {
-        public void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
-        public void Initialize(InitializationContext context) => throw new NotImplementedException();
+        public void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
+        public void Initialize(GeneratorInitializationContext context) => throw new NotImplementedException();
     }
 
     [Generator]
     public class BaseGenerator : ISourceGenerator
     {
-        public virtual void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
-        public void Initialize(InitializationContext context) => throw new NotImplementedException();
+        public virtual void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
+        public void Initialize(GeneratorInitializationContext context) => throw new NotImplementedException();
     }
 
     [Generator]
     public class SubClassedGenerator : BaseGenerator
     {
-        public override void Execute(SourceGeneratorContext context) => throw new NotImplementedException();
+        public override void Execute(GeneratorExecutionContext context) => throw new NotImplementedException();
     }
 
     [Generator]

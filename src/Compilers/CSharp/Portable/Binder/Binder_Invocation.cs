@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -1093,6 +1095,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             bool hasBaseReceiver = receiver != null && receiver.Kind == BoundKind.BaseReference;
 
             ReportDiagnosticsIfObsolete(diagnostics, method, node, hasBaseReceiver);
+            ReportDiagnosticsIfUnmanagedCallersOnly(diagnostics, method, node.Location, isDelegateConversion: false);
 
             // No use site errors, but there could be use site warnings.
             // If there are any use site warnings, they have already been reported by overload resolution.

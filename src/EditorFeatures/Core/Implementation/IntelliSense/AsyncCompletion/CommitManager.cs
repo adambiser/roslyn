@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -27,7 +29,7 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
     internal sealed class CommitManager : ForegroundThreadAffinitizedObject, IAsyncCompletionCommitManager
     {
         private static readonly AsyncCompletionData.CommitResult CommitResultUnhandled =
-            new AsyncCompletionData.CommitResult(isHandled: false, AsyncCompletionData.CommitBehavior.None);
+            new(isHandled: false, AsyncCompletionData.CommitBehavior.None);
 
         private readonly RecentItemsManager _recentItemsManager;
         private readonly ITextView _textView;
@@ -116,14 +118,14 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
             // We can be called before for ShouldCommitCompletion. However, that call does not provide rules applied for the completion item.
             // Now we check for the commit charcter in the context of Rules that could change the list of commit characters.
 
-            if (!Helpers.IsStandardCommitCharacter(typeChar) && !IsCommitCharacter(serviceRules, roslynItem, typeChar, filterText))
+            if (!Helpers.IsStandardCommitCharacter(typeChar) && !IsCommitCharacter(serviceRules, roslynItem, typeChar))
             {
                 // Returning None means we complete the current session with a void commit. 
                 // The Editor then will try to trigger a new completion session for the character.
                 return new AsyncCompletionData.CommitResult(isHandled: true, AsyncCompletionData.CommitBehavior.None);
             }
 
-            if (!Helpers.TryGetInitialTriggerLocation(item, out var triggerLocation))
+            if (!Helpers.TryGetInitialTriggerLocation(session, out var triggerLocation))
             {
                 // Need the trigger snapshot to calculate the span when the commit changes to be applied.
                 // They should always be available from VS. Just to be defensive, if it's not found here, Roslyn should not make a commit.
@@ -185,13 +187,13 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
             if (!subjectBuffer.CheckEditAccess())
             {
                 // We are on the wrong thread.
-                FatalError.ReportWithoutCrash(new InvalidOperationException("Subject buffer did not provide Edit Access"));
+                FatalError.ReportAndCatch(new InvalidOperationException("Subject buffer did not provide Edit Access"));
                 return new AsyncCompletionData.CommitResult(isHandled: true, AsyncCompletionData.CommitBehavior.None);
             }
 
             if (subjectBuffer.EditInProgress)
             {
-                FatalError.ReportWithoutCrash(new InvalidOperationException("Subject buffer is editing by someone else."));
+                FatalError.ReportAndCatch(new InvalidOperationException("Subject buffer is editing by someone else."));
                 return new AsyncCompletionData.CommitResult(isHandled: true, AsyncCompletionData.CommitBehavior.None);
             }
 
@@ -206,7 +208,7 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
             {
                 change = completionService.GetChangeAsync(document, roslynItem, completionListSpan, commitCharacter, disallowAddingImports, cancellationToken).WaitAndGetResult(cancellationToken);
             }
-            catch (OperationCanceledException e) when (e.CancellationToken != cancellationToken && FatalError.ReportWithoutCrash(e))
+            catch (OperationCanceledException e) when (e.CancellationToken != cancellationToken && FatalError.ReportAndCatch(e))
             {
                 return CommitResultUnhandled;
             }
@@ -294,7 +296,7 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
             return new AsyncCompletionData.CommitResult(isHandled: true, AsyncCompletionData.CommitBehavior.None);
         }
 
-        internal static bool IsCommitCharacter(CompletionRules completionRules, CompletionItem item, char ch, string textTypedSoFar)
+        internal static bool IsCommitCharacter(CompletionRules completionRules, CompletionItem item, char ch)
         {
             // First see if the item has any specifc commit rules it wants followed.
             foreach (var rule in item.Rules.CommitCharacterRules)
@@ -318,12 +320,6 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
                     case CharacterSetModificationKind.Replace:
                         return rule.Characters.Contains(ch);
                 }
-            }
-
-            // general rule: if the filtering text exactly matches the start of the item then it must be a filter character
-            if (Helpers.TextTypedSoFarMatchesItem(item, textTypedSoFar))
-            {
-                return false;
             }
 
             // Fall back to the default rules for this language's completion service.

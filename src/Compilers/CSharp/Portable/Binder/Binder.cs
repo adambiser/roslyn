@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -81,7 +79,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Get the next binder in which to look up a name, if not found by this binder.
         /// </summary>
-        internal protected Binder? Next { get; }
+        protected internal Binder? Next { get; }
 
         /// <summary>
         /// <see cref="OverflowChecks.Enabled"/> if we are in an explicitly checked context (within checked block or expression).
@@ -253,6 +251,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal bool AreNullableAnnotationsEnabled(SyntaxToken token)
         {
             RoslynDebug.Assert(token.SyntaxTree is object);
+            if ((Flags & BinderFlags.IgnoreNullableContext) != 0)
+            {
+                return false;
+            }
             return AreNullableAnnotationsEnabled(token.SyntaxTree, token.SpanStart);
         }
 
@@ -703,6 +705,24 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             return kind;
+        }
+
+        internal static void ReportDiagnosticsIfUnmanagedCallersOnly(DiagnosticBag diagnostics, MethodSymbol symbol, Location location, bool isDelegateConversion)
+        {
+            var unmanagedCallersOnlyAttributeData = symbol.GetUnmanagedCallersOnlyAttributeData(forceComplete: false);
+            if (unmanagedCallersOnlyAttributeData != null)
+            {
+                // Either we haven't yet bound the attributes of this method, or there is an UnmanagedCallersOnly present.
+                // In the former case, we use a lazy diagnostic that may end up being ignored later, to avoid causing a
+                // binding cycle.
+                diagnostics.Add(unmanagedCallersOnlyAttributeData == UnmanagedCallersOnlyAttributeData.Uninitialized
+                                    ? (DiagnosticInfo)new LazyUnmanagedCallersOnlyMethodCalledDiagnosticInfo(symbol, isDelegateConversion)
+                                    : new CSDiagnosticInfo(isDelegateConversion
+                                                               ? ErrorCode.ERR_UnmanagedCallersOnlyMethodsCannotBeConvertedToDelegate
+                                                               : ErrorCode.ERR_UnmanagedCallersOnlyMethodsCannotBeCalledDirectly,
+                                                           symbol),
+                                location);
+            }
         }
 
         internal static bool IsSymbolAccessibleConditional(

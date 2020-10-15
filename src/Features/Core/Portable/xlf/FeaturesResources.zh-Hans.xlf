@@ -345,6 +345,11 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
         <target state="translated">示例:</target>
         <note>Plural form when we have multiple examples to show.</note>
       </trans-unit>
+      <trans-unit id="Extract_base_class">
+        <source>Extract base class...</source>
+        <target state="new">Extract base class...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Extract_interface">
         <source>Extract interface...</source>
         <target state="translated">提取接口…</target>
@@ -493,6 +498,16 @@ Make sure to use the "tt" specifier for languages for which it's necessary to ma
       <trans-unit id="Indent_wrapped_parameters">
         <source>Indent wrapped parameters</source>
         <target state="translated">缩进包装参数</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Inline_0">
+        <source>Inline '{0}'</source>
+        <target state="new">Inline '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Inline_and_keep_0">
+        <source>Inline and keep '{0}'</source>
+        <target state="new">Inline and keep '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="Insufficient_hexadecimal_digits">
@@ -2066,13 +2081,13 @@ Zero-width positive lookbehind assertions are typically used at the beginning of
         <note />
       </trans-unit>
       <trans-unit id="_0_cannot_be_null_or_empty">
-        <source>'{0}' cannot be null or empty</source>
-        <target state="translated">“{0}”不能是 Null 或为空。</target>
+        <source>'{0}' cannot be null or empty.</source>
+        <target state="needs-review-translation">“{0}”不能是 Null 或为空。</target>
         <note />
       </trans-unit>
       <trans-unit id="_0_cannot_be_null_or_whitespace">
-        <source>'{0}' cannot be null or whitespace</source>
-        <target state="translated">“{0}”不能为 Null 或空白</target>
+        <source>'{0}' cannot be null or whitespace.</source>
+        <target state="needs-review-translation">“{0}”不能为 Null 或空白。</target>
         <note />
       </trans-unit>
       <trans-unit id="_0_is_not_null_here">

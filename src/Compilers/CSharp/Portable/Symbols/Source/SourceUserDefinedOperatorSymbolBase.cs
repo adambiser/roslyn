@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -155,8 +157,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             if (returnType.Type.IsStatic)
             {
+                // Operators in interfaces was introduced in C# 8, so there's no need to be specially concerned about
+                // maintaining backcompat with the native compiler bug around interfaces.
                 // '{0}': static types cannot be used as return types
-                diagnostics.Add(ErrorCode.ERR_ReturnTypeIsStaticClass, returnTypeSyntax.Location, returnType.Type);
+                diagnostics.Add(ErrorFacts.GetStaticClassReturnCode(useWarning: false), returnTypeSyntax.Location, returnType.Type);
             }
 
             return (returnType, parameters);
@@ -641,7 +645,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return ImmutableArray<TypeParameterSymbol>.Empty; }
         }
 
-        public sealed override ImmutableArray<TypeParameterConstraintClause> GetTypeParameterConstraintClauses()
+        public sealed override ImmutableArray<TypeParameterConstraintClause> GetTypeParameterConstraintClauses(bool canIgnoreNullableContext)
             => ImmutableArray<TypeParameterConstraintClause>.Empty;
 
         public sealed override RefKind RefKind

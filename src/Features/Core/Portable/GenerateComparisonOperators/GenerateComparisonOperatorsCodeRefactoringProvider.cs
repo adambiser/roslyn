@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Immutable;
 using System.Composition;
@@ -141,7 +139,7 @@ namespace Microsoft.CodeAnalysis.GenerateComparisonOperators
             var options = await document.GetOptionsAsync(cancellationToken).ConfigureAwait(false);
             var semanticModel = await document.GetRequiredSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 
-            var containingType = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(typeDeclaration, cancellationToken);
+            var containingType = (INamedTypeSymbol)semanticModel.GetRequiredDeclaredSymbol(typeDeclaration, cancellationToken);
             var compareMethod = TryGetCompareMethodImpl(containingType, comparableType)!;
 
             var generator = document.GetRequiredLanguageService<SyntaxGenerator>();

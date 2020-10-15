@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -124,7 +122,7 @@ namespace Microsoft.CodeAnalysis
         /// Constructs a new <see cref="SymbolKey"/> representing the provided <paramref name="symbol"/>.
         /// </summary>
         public static SymbolKey Create(ISymbol? symbol, CancellationToken cancellationToken = default)
-            => new SymbolKey(CreateString(symbol, cancellationToken));
+            => new(CreateString(symbol, cancellationToken));
 
         /// <summary>
         /// Returns an <see cref="IEqualityComparer{T}"/> that determines if two <see cref="SymbolKey"/>s
@@ -144,7 +142,7 @@ namespace Microsoft.CodeAnalysis
 
         public static bool CanCreate(ISymbol symbol, CancellationToken cancellationToken)
         {
-            if (BodyLevelSymbolKey.IsBodyLevelSymbol(symbol))
+            if (IsBodyLevelSymbol(symbol))
             {
                 var locations = BodyLevelSymbolKey.GetBodyLevelSourceLocations(symbol, cancellationToken);
                 if (locations.Length == 0)
@@ -307,5 +305,15 @@ namespace Microsoft.CodeAnalysis
 
             return result;
         }
+
+        public static bool IsBodyLevelSymbol(ISymbol symbol)
+            => symbol switch
+            {
+                ILabelSymbol _ => true,
+                IRangeVariableSymbol _ => true,
+                ILocalSymbol _ => true,
+                IMethodSymbol { MethodKind: MethodKind.LocalFunction } _ => true,
+                _ => false,
+            };
     }
 }

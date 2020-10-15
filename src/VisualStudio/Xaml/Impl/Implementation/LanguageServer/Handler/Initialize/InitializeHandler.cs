@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 using System;
 using System.Composition;
 using System.Threading;
@@ -16,7 +14,7 @@ using Microsoft.VisualStudio.LanguageServer.Protocol;
 namespace Microsoft.VisualStudio.LanguageServices.Xaml.LanguageServer.Handler
 {
     [Shared]
-    [ExportLspMethod(Methods.InitializeName, StringConstants.XamlLanguageName)]
+    [ExportLspMethod(Methods.InitializeName, mutatesSolutionState: false, StringConstants.XamlLanguageName)]
     internal class InitializeHandler : IRequestHandler<InitializeParams, InitializeResult>
     {
         [ImportingConstructor]
@@ -25,16 +23,22 @@ namespace Microsoft.VisualStudio.LanguageServices.Xaml.LanguageServer.Handler
         {
         }
 
+        public TextDocumentIdentifier? GetTextDocumentIdentifier(InitializeParams request) => null;
+
         public Task<InitializeResult> HandleRequestAsync(InitializeParams request, RequestContext context, CancellationToken cancellationToken)
         {
 
             return Task.FromResult(new InitializeResult
             {
-                Capabilities = new ServerCapabilities
+                Capabilities = new VSServerCapabilities
                 {
                     CompletionProvider = new CompletionOptions { ResolveProvider = true, TriggerCharacters = new string[] { "<", " ", ":", ".", "=", "\"", "'", "{", ",", "(" } },
                     HoverProvider = true,
-                    FoldingRangeProvider = new FoldingRangeProviderOptions { },
+                    FoldingRangeProvider = new FoldingRangeOptions { },
+                    DocumentFormattingProvider = true,
+                    DocumentRangeFormattingProvider = true,
+                    DocumentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions { FirstTriggerCharacter = ">", MoreTriggerCharacter = new string[] { "\n" } },
+                    OnAutoInsertProvider = new DocumentOnAutoInsertOptions { TriggerCharacters = new[] { "=", "/", ">" } },
                     TextDocumentSync = new TextDocumentSyncOptions
                     {
                         Change = TextDocumentSyncKind.None

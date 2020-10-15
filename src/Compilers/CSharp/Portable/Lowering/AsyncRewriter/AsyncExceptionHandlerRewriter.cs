@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -141,7 +143,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 tryStatementSyntax.IsKind(SyntaxKind.UsingStatement) ||
                 tryStatementSyntax.IsKind(SyntaxKind.ForEachStatement) ||
                 tryStatementSyntax.IsKind(SyntaxKind.ForEachVariableStatement) ||
-                tryStatementSyntax.IsKind(SyntaxKind.LocalDeclarationStatement));
+                tryStatementSyntax.IsKind(SyntaxKind.LocalDeclarationStatement) ||
+                tryStatementSyntax.IsKind(SyntaxKind.LockStatement));
 
             BoundStatement finalizedRegion;
             BoundBlock rewrittenFinally;
